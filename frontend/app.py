@@ -1,4 +1,4 @@
-# app.py (ROOT LEVEL)
+# app.py (FRONTEND FIXED FOR MICROSERVICES)
 
 import streamlit as st
 import requests
@@ -8,7 +8,10 @@ import requests
 # --------------------------
 st.set_page_config(page_title="Hotel Booking System", layout="wide")
 
-BACKEND_BASE = "http://localhost:8000"   # Update your backend gateway URL if deployed
+# Correct Microservices URLs
+HOTEL_API = "http://localhost:8001"
+BOOKING_API = "http://localhost:8003"
+AUTH_API = "http://localhost:8002"
 
 
 # --------------------------
@@ -42,10 +45,15 @@ def search_hotels():
     st.subheader("🔍 Search Hotels")
 
     city = st.text_input("Enter city name")
-    
+
     if st.button("Search"):
         try:
-            response = requests.get(f"{BACKEND_BASE}/hotels/search?city={city}")
+            response = requests.get(f"{HOTEL_API}/hotels/search?city={city}")
+
+            if response.status_code != 200:
+                st.error("Backend error while fetching hotels")
+                return
+
             data = response.json()
 
             if len(data) == 0:
@@ -74,7 +82,7 @@ def book_room():
         payload = {"hotel_id": hotel_id, "user_name": user_name}
 
         try:
-            response = requests.post(f"{BACKEND_BASE}/booking/book", json=payload)
+            response = requests.post(f"{BOOKING_API}/booking/book", json=payload)
 
             if response.status_code == 200:
                 st.success("Room booked successfully!")
@@ -96,7 +104,7 @@ def view_booking():
 
     if st.button("Get Details"):
         try:
-            response = requests.get(f"{BACKEND_BASE}/booking/{booking_id}")
+            response = requests.get(f"{BOOKING_API}/booking/{booking_id}")
             if response.status_code == 200:
                 st.json(response.json())
             else:
@@ -125,7 +133,7 @@ def admin_add_hotel():
         }
 
         try:
-            response = requests.post(f"{BACKEND_BASE}/hotels/add", json=payload)
+            response = requests.post(f"{HOTEL_API}/hotels/add", json=payload)
 
             if response.status_code == 200:
                 st.success("Hotel added successfully!")
@@ -137,7 +145,6 @@ def admin_add_hotel():
 
 
 # --------------------------
-# MAIN
+# RUN APP
 # --------------------------
-if __name__ == "__main__":
-    home()
+home()
