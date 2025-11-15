@@ -1,0 +1,4 @@
+streamlit>=1.20
+sqlite3    # builtin, kept for clarity
+bcrypt
+python-dotenv
